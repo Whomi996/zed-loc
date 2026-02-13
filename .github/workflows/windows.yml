@@ -113,27 +113,29 @@ jobs:
           $backend = "${{ matrix.backend }}"
           $json = "$env:L10N_JSON"
 
-          @"
-Zed commit: $zedSha
-zed-loc commit: $locSha
-Backend: $backend
-L10N JSON: $json
-"@ | Out-File -Encoding UTF8 "$pkg/BUILD_INFO.txt"
+          $buildInfo = @(
+            "Zed commit: $zedSha",
+            "zed-loc commit: $locSha",
+            "Backend: $backend",
+            "L10N JSON: $json"
+          ) -join "`n"
+          $buildInfo | Out-File -Encoding UTF8 "$pkg/BUILD_INFO.txt"
 
-          @"
-对应源码 / Source:
-- Zed: https://github.com/zed-industries/zed @ $zedSha
-- zed-loc(本仓库): https://github.com/$env:REPO @ $locSha
-
-复现构建 / Reproduce:
-- checkout Zed 到 ./zed（commit $zedSha）
-- 运行：python3 replace.py $json
-- 在 ./zed 下：cargo build --release
-
-许可证 / Licenses:
-- 本仓库：MIT（见 LICENSE.zed-loc.MIT.txt）
-- Zed：见 licenses/ 目录（从上游源码复制的 LICENSE*）
-"@ | Out-File -Encoding UTF8 "$pkg/SOURCE.txt"
+          $sourceInfo = @(
+            "对应源码 / Source:",
+            "- Zed: https://github.com/zed-industries/zed @ $zedSha",
+            "- zed-loc(本仓库): https://github.com/$env:REPO @ $locSha",
+            "",
+            "复现构建 / Reproduce:",
+            "- checkout Zed 到 ./zed（commit $zedSha）",
+            "- 运行：python3 replace.py $json",
+            "- 在 ./zed 下：cargo build --release",
+            "",
+            "许可证 / Licenses:",
+            "- 本仓库：MIT（见 LICENSE.zed-loc.MIT.txt）",
+            "- Zed：见 licenses/ 目录（从上游源码复制的 LICENSE*）"
+          ) -join "`n"
+          $sourceInfo | Out-File -Encoding UTF8 "$pkg/SOURCE.txt"
 
       - name: Archive build
         uses: actions/upload-artifact@v4
