@@ -18,6 +18,12 @@
 - `LICENSE.zed-loc.MIT.txt`：本仓库许可证
 - `licenses/`：从上游 Zed 源码复制的 `LICENSE*` 文件
 
+## 上游
+
+本仓库为 fork，用于自用构建；上游项目：
+
+- https://github.com/TC999/zed-loc
+
 ## 免责声明
 
 本仓库为社区汉化构建脚本与翻译，不隶属于 Zed 官方。
