@@ -1,10 +1,28 @@
 name: Windows 编译
 
 on:
-  #schedule:
-  #  - cron: "0 0 * * *" # Runs every night at midnight UTC
+  schedule:
+    - cron: "0 0 * * *" # 每天 UTC 00:00
   workflow_dispatch:
-  #pull_request:
+    inputs:
+      l10n_json:
+        description: "用于替换的本地化 JSON 文件路径（默认 zh.json）"
+        required: false
+        default: "zh.json"
+      create_release:
+        description: "是否发布到 GitHub Release（仅 main 分支生效）"
+        required: false
+        type: boolean
+        default: true
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/windows.yml"
+      - "replace.py"
+      - "zh.json"
+      - "zh-*/**"
+      - "NOTICE.md"
+      - "LICENSE"
 
 jobs:
   build:
@@ -47,7 +65,10 @@ jobs:
           python-version: "3.10"
 
       - name: 替换
-        run: python3 replace.py
+        shell: pwsh
+        env:
+          L10N_JSON: ${{ github.event.inputs.l10n_json || 'zh.json' }}
+        run: python3 replace.py "$env:L10N_JSON"
 
       - name: Install rust nightly
         uses: dtolnay/rust-toolchain@stable
@@ -69,16 +90,61 @@ jobs:
         working-directory: zed
         run: cargo build --release
 
+      - name: Prepare package
+        shell: pwsh
+        env:
+          L10N_JSON: ${{ github.event.inputs.l10n_json || 'zh.json' }}
+          REPO: ${{ github.repository }}
+        run: |
+          $ErrorActionPreference = "Stop"
+
+          $pkg = "package"
+          New-Item -ItemType Directory -Force -Path $pkg | Out-Null
+
+          Copy-Item "zed/target/release/zed.exe" "$pkg/zed.exe"
+          Copy-Item "NOTICE.md" "$pkg/NOTICE.md"
+          Copy-Item "LICENSE" "$pkg/LICENSE.zed-loc.MIT.txt"
+
+          New-Item -ItemType Directory -Force -Path "$pkg/licenses" | Out-Null
+          Copy-Item "zed/LICENSE*" "$pkg/licenses/" -ErrorAction SilentlyContinue
+
+          $zedSha = (git -C zed rev-parse HEAD).Trim()
+          $locSha = (git rev-parse HEAD).Trim()
+          $backend = "${{ matrix.backend }}"
+          $json = "$env:L10N_JSON"
+
+          @"
+Zed commit: $zedSha
+zed-loc commit: $locSha
+Backend: $backend
+L10N JSON: $json
+"@ | Out-File -Encoding UTF8 "$pkg/BUILD_INFO.txt"
+
+          @"
+对应源码 / Source:
+- Zed: https://github.com/zed-industries/zed @ $zedSha
+- zed-loc(本仓库): https://github.com/$env:REPO @ $locSha
+
+复现构建 / Reproduce:
+- checkout Zed 到 ./zed（commit $zedSha）
+- 运行：python3 replace.py $json
+- 在 ./zed 下：cargo build --release
+
+许可证 / Licenses:
+- 本仓库：MIT（见 LICENSE.zed-loc.MIT.txt）
+- Zed：见 licenses/ 目录（从上游源码复制的 LICENSE*）
+"@ | Out-File -Encoding UTF8 "$pkg/SOURCE.txt"
+
       - name: Archive build
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact_name }}
-          path: zed/target/release/zed.exe
+          path: package
 
   release:
     needs: build
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.create_release == 'true') || (github.event_name == 'push' && contains(github.event.head_commit.message, '[release]')))
     permissions:
       contents: write
 
@@ -88,23 +154,24 @@ jobs:
         with:
           path: artifacts
 
-      - name: Get the current date
-        id: date
-        run: echo "CURRENT_DATE=$(date +'%Y%m%d')" >> $GITHUB_ENV
+      - name: Set release tag
+        run: |
+          echo "RELEASE_TAG=$(date +'%Y%m%d')-${GITHUB_RUN_NUMBER}" >> $GITHUB_ENV
+          echo "RELEASE_NAME=$(date +'%Y%m%d') #${GITHUB_RUN_NUMBER}" >> $GITHUB_ENV
 
-      - name: Create release directories and zip
+      - name: Create release zips
         run: |
           mkdir -p zed-release zed-release-opengl
-          mv artifacts/zed-release/zed.exe zed-release/
-          mv artifacts/zed-release-opengl/zed.exe zed-release-opengl/
-          zip -r zed-windows.zip zed-release/*
-          zip -r zed-windows-opengl.zip zed-release-opengl/*
+          cp -a artifacts/zed-release/. zed-release/
+          cp -a artifacts/zed-release-opengl/. zed-release-opengl/
+          (cd zed-release && zip -r ../zed-windows.zip .)
+          (cd zed-release-opengl && zip -r ../zed-windows-opengl.zip .)
 
       - name: Upload release build artifacts to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          name: ${{ env.CURRENT_DATE }}
-          tag_name: ${{ env.CURRENT_DATE }}
+          name: ${{ env.RELEASE_NAME }}
+          tag_name: ${{ env.RELEASE_TAG }}
           draft: false
           make_latest: true
           files: |

@@ -15,6 +15,18 @@
 
 `zed-loc` 是一个用于本地化 [Zed 编辑器](https://github.com/zed-industries/zed)的工具。它提取源代码中的字符串并生成 JSON 文件，以便进行翻译和本地化，同时支持替换后直接构建可执行文件。
 
+## Windows 下载（无需本地编译）
+
+本仓库已配置 GitHub Actions 自动构建 Windows 版本，你可以直接下载并使用中文界面：
+
+1. 打开 Releases（推荐）：https://github.com/Whomi996/zed-loc/releases/latest
+2. 下载 `zed-windows.zip`（Vulkan）或 `zed-windows-opengl.zip`（OpenGL，兼容性更好）
+3. 解压后运行 `zed.exe`
+
+也可以打开 Actions：https://github.com/Whomi996/zed-loc/actions ，进入最近一次 `Windows 编译` 运行，在页面底部下载 Artifacts。
+
+> 如果构建成功但发布 Release 失败，请检查仓库 Settings → Actions → General → Workflow permissions 是否为 **Read and write permissions**。
+
 ## 特性
 
 - 自动提取源代码中的字符串
@@ -29,7 +41,7 @@
 运行以下命令克隆项目，或直接点击右上角“代码”下载压缩包：
 
 ```bash
-git clone https://github.com/tc999/zed-loc.git
+git clone https://github.com/Whomi996/zed-loc.git
 cd zed-loc
 ```
 ### 提取词条
@@ -110,30 +122,30 @@ cargo run
 
 本项目基于 [MIT 许可证](LICENSE)发布，允许任何组织和个人免费使用。
 
-[issues-url]: https://github.com/TC999/zed-loc/issues "议题"
-[issues-image]: https://img.shields.io/github/issues/TC999/zed-loc?style=flat-square&logo=github&label=议题
+[issues-url]: https://github.com/Whomi996/zed-loc/issues "议题"
+[issues-image]: https://img.shields.io/github/issues/Whomi996/zed-loc?style=flat-square&logo=github&label=议题
 
-[pulls-url]: https://github.com/TC999/zed-loc/pulls "拉取请求"
-[pulls-image]: https://img.shields.io/github/issues-pr-raw/TC999/zed-loc?style=flat&logo=github&%3Fcolor%3Dgreen&label=%E6%8B%89%E5%8F%96%E8%AF%B7%E6%B1%82
+[pulls-url]: https://github.com/Whomi996/zed-loc/pulls "拉取请求"
+[pulls-image]: https://img.shields.io/github/issues-pr-raw/Whomi996/zed-loc?style=flat&logo=github&%3Fcolor%3Dgreen&label=%E6%8B%89%E5%8F%96%E8%AF%B7%E6%B1%82
 
-[stars-url]: https://github.com/TC999/zed-loc/stargazers "星标"
-[stars-image]: https://img.shields.io/github/stars/TC999/zed-loc?style=flat-square&logo=github&label=星标
+[stars-url]: https://github.com/Whomi996/zed-loc/stargazers "星标"
+[stars-image]: https://img.shields.io/github/stars/Whomi996/zed-loc?style=flat-square&logo=github&label=星标
 
-[forks-url]: https://github.com/TC999/zed-loc/fork "复刻"
-[forks-image]: https://img.shields.io/github/forks/TC999/zed-loc?style=flat-square&logo=github&label=复刻
+[forks-url]: https://github.com/Whomi996/zed-loc/fork "复刻"
+[forks-image]: https://img.shields.io/github/forks/Whomi996/zed-loc?style=flat-square&logo=github&label=复刻
 
-[discussions-url]: https://github.com/TC999/zed-loc/discussions "讨论"
+[discussions-url]: https://github.com/Whomi996/zed-loc/discussions "讨论"
 
 [hits-url]: https://hits.dwyl.com/ "访问量"
-[hits-image]: https://custom-icon-badges.demolab.com/endpoint?url=https%3A%2F%2Fhits.dwyl.com%2FTC999%2Fzed-loc.json%3Fcolor%3Dgreen&label=%E8%AE%BF%E9%97%AE%E9%87%8F&logo=graph
+[hits-image]: https://custom-icon-badges.demolab.com/endpoint?url=https%3A%2F%2Fhits.dwyl.com%2FWhomi996%2Fzed-loc.json%3Fcolor%3Dgreen&label=%E8%AE%BF%E9%97%AE%E9%87%8F&logo=graph
 
-[repo-url]: https://github.com/TC999/zed-loc "仓库地址"
+[repo-url]: https://github.com/Whomi996/zed-loc "仓库地址"
 
-[repo-size-image]:https://img.shields.io/github/repo-size/TC999/zed-loc?style=flat-square&label=%E4%BB%93%E5%BA%93%E5%A4%A7%E5%B0%8F
+[repo-size-image]:https://img.shields.io/github/repo-size/Whomi996/zed-loc?style=flat-square&label=%E4%BB%93%E5%BA%93%E5%A4%A7%E5%B0%8F
 
 
-[download-url]: https://github.com/TC999/zed-loc/releases/latest "下载"
-[download-image]: https://img.shields.io/github/downloads/TC999/zed-loc/total?style=flat-square&logo=github&label=%E6%80%BB%E4%B8%8B%E8%BD%BD%E6%95%B0 "总下载数"
+[download-url]: https://github.com/Whomi996/zed-loc/releases/latest "下载"
+[download-image]: https://img.shields.io/github/downloads/Whomi996/zed-loc/total?style=flat-square&logo=github&label=%E6%80%BB%E4%B8%8B%E8%BD%BD%E6%95%B0 "总下载数"
 
-[license-url]: https://github.com/TC999/zed-loc/blob/master/LICENSE "许可证"
-[license-image]: https://custom-icon-badges.demolab.com/github/license/TC999/zed-loc?style=flat&logo=law&label=%E8%AE%B8%E5%8F%AF%E8%AF%81
+[license-url]: https://github.com/Whomi996/zed-loc/blob/main/LICENSE "许可证"
+[license-image]: https://custom-icon-badges.demolab.com/github/license/Whomi996/zed-loc?style=flat&logo=law&label=%E8%AE%B8%E5%8F%AF%E8%AF%81
