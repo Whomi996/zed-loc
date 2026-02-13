@@ -19,6 +19,7 @@ on:
     paths:
       - ".github/workflows/windows.yml"
       - "replace.py"
+      - "tools/auto_fill_l10n.py"
       - "zh.json"
       - "zh-*/**"
       - "NOTICE.md"
@@ -64,11 +65,18 @@ jobs:
         with:
           python-version: "3.10"
 
+      - name: 生成增强版本地化 JSON（保守）
+        shell: pwsh
+        env:
+          L10N_JSON: ${{ github.event.inputs.l10n_json || 'zh.json' }}
+        run: |
+          python3 tools/auto_fill_l10n.py --input "$env:L10N_JSON" --output "l10n.generated.json" --max 250 --require-uppercase-start
+
       - name: 替换
         shell: pwsh
         env:
           L10N_JSON: ${{ github.event.inputs.l10n_json || 'zh.json' }}
-        run: python3 replace.py "$env:L10N_JSON"
+        run: python3 replace.py "l10n.generated.json"
 
       - name: Install rust nightly
         uses: dtolnay/rust-toolchain@stable
@@ -104,6 +112,7 @@ jobs:
           Copy-Item "zed/target/release/zed.exe" "$pkg/zed.exe"
           Copy-Item "NOTICE.md" "$pkg/NOTICE.md"
           Copy-Item "LICENSE" "$pkg/LICENSE.zed-loc.MIT.txt"
+          Copy-Item "l10n.generated.json" "$pkg/l10n.generated.json" -ErrorAction SilentlyContinue
 
           New-Item -ItemType Directory -Force -Path "$pkg/licenses" | Out-Null
           Copy-Item "zed/LICENSE*" "$pkg/licenses/" -ErrorAction SilentlyContinue
@@ -111,13 +120,15 @@ jobs:
           $zedSha = (git -C zed rev-parse HEAD).Trim()
           $locSha = (git rev-parse HEAD).Trim()
           $backend = "${{ matrix.backend }}"
-          $json = "$env:L10N_JSON"
+          $inputJson = "$env:L10N_JSON"
+          $usedJson = "l10n.generated.json"
 
           $buildInfo = @(
             "Zed commit: $zedSha",
             "zed-loc commit: $locSha",
             "Backend: $backend",
-            "L10N JSON: $json"
+            "Input L10N JSON: $inputJson",
+            "Used L10N JSON: $usedJson"
           ) -join "`n"
           $buildInfo | Out-File -Encoding UTF8 "$pkg/BUILD_INFO.txt"
 
@@ -128,7 +139,8 @@ jobs:
             "",
             "复现构建 / Reproduce:",
             "- checkout Zed 到 ./zed（commit $zedSha）",
-            "- 运行：python3 replace.py $json",
+            "- 运行：python3 tools/auto_fill_l10n.py --input $inputJson --output $usedJson --max 250 --require-uppercase-start",
+            "- 运行：python3 replace.py $usedJson",
             "- 在 ./zed 下：cargo build --release",
             "",
             "许可证 / Licenses:",
